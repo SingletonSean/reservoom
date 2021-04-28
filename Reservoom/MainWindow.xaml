@@ -5,9 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Reservoom"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:Reservoom.Views"
     Title="Reservoom"
     Width="800"
     Height="450"
+    FontSize="14"
     mc:Ignorable="d">
-    <Grid />
+    <Grid MaxWidth="600" Margin="20 10">
+        <views:MakeReservationView />
+    </Grid>
 </Window>
