@@ -13,20 +13,19 @@ namespace Reservoom.Models
 
         public string Name { get; }
 
-        public Hotel(string name)
+        public Hotel(string name, ReservationBook reservationBook)
         {
             Name = name;
-
-            _reservationBook = new ReservationBook();
+            _reservationBook = reservationBook;
         }
 
         /// <summary>
         /// Get all reservations.
         /// </summary>
         /// <returns>All reservations in the hotel reservation book.</returns>
-        public IEnumerable<Reservation> GetAllReservations()
+        public async Task<IEnumerable<Reservation>> GetAllReservations()
         {
-            return _reservationBook.GetAllReservations();
+            return await _reservationBook.GetAllReservations();
         }
 
         /// <summary>
@@ -34,9 +33,9 @@ namespace Reservoom.Models
         /// </summary>
         /// <param name="reservation">The incoming reservation.</param>
         /// <exception cref="ReservationConflictException">Thrown if incoming reservation conflicts with existing reservation.</exception>
-        public void MakeReservation(Reservation reservation)
+        public async Task MakeReservation(Reservation reservation)
         {
-            _reservationBook.AddReservation(reservation);
+            await _reservationBook.AddReservation(reservation);
         }
     }
 }

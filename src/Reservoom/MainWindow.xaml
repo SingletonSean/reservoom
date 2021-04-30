@@ -6,12 +6,22 @@
     xmlns:local="clr-namespace:Reservoom"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:Reservoom.Views"
+    xmlns:vms="clr-namespace:Reservoom.ViewModels"
     Title="Reservoom"
     Width="800"
     Height="450"
     FontSize="14"
     mc:Ignorable="d">
     <Grid MaxWidth="600" Margin="20 10">
-        <views:MakeReservationView DataContext="{Binding CurrentViewModel}" />
+        <Grid.Resources>
+            <DataTemplate DataType="{x:Type vms:MakeReservationViewModel}">
+                <views:MakeReservationView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vms:ReservationListingViewModel}">
+                <views:ReservationListingView />
+            </DataTemplate>
+        </Grid.Resources>
+
+        <ContentControl Content="{Binding CurrentViewModel}" />
     </Grid>
 </Window>

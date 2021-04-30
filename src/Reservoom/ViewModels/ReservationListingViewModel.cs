@@ -1,5 +1,7 @@
 ﻿using Reservoom.Commands;
 using Reservoom.Models;
+using Reservoom.Services;
+using Reservoom.Stores;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,17 +18,35 @@ namespace Reservoom.ViewModels
 
         public IEnumerable<ReservationViewModel> Reservations => _reservations;
 
+        public ICommand LoadReservationsCommand { get; }
         public ICommand MakeReservationCommand { get; }
 
-        public ReservationListingViewModel()
+        public ReservationListingViewModel(Hotel hotel, NavigationService makeReservationNavigationService)
         {
             _reservations = new ObservableCollection<ReservationViewModel>();
 
-            MakeReservationCommand = new NavigateCommand();
+            LoadReservationsCommand = new LoadReservationsCommand(this, hotel);
+            MakeReservationCommand = new NavigateCommand(makeReservationNavigationService);
+        }
 
-            _reservations.Add(new ReservationViewModel(new Reservation(new RoomID(1, 2), "SingletonSean", DateTime.MinValue, DateTime.MaxValue)));
-            _reservations.Add(new ReservationViewModel(new Reservation(new RoomID(3, 2), "Joe", DateTime.MinValue, DateTime.MaxValue)));
-            _reservations.Add(new ReservationViewModel(new Reservation(new RoomID(2, 4), "Mary", DateTime.MinValue, DateTime.MaxValue)));
+        public static ReservationListingViewModel LoadViewModel(Hotel hotel, NavigationService makeReservationNavigationService)
+        {
+            ReservationListingViewModel viewModel = new ReservationListingViewModel(hotel, makeReservationNavigationService);
+
+            viewModel.LoadReservationsCommand.Execute(null);
+
+            return viewModel;
+        }
+
+        public void UpdateReservations(IEnumerable<Reservation> reservations)
+        {
+            _reservations.Clear();
+
+            foreach (Reservation reservation in reservations)
+            {
+                ReservationViewModel reservationViewModel = new ReservationViewModel(reservation);
+                _reservations.Add(reservationViewModel);
+            }
         }
     }
 }
