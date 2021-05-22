@@ -96,7 +96,7 @@
                 Grid.Row="1"
                 Grid.Column="1"
                 Margin="10 5 0 0"
-                SelectedDate="{Binding EndDate, UpdateSourceTrigger=PropertyChanged}" />
+                SelectedDate="{Binding EndDate, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
         </Grid>
 
         <StackPanel
