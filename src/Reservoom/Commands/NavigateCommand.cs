@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Reservoom.Commands
 {
-    public class NavigateCommand : CommandBase
+    public class NavigateCommand<TViewModel> : CommandBase where TViewModel : ViewModelBase
     {
-        private readonly NavigationService _navigationService;
+        private readonly NavigationService<TViewModel> _navigationService;
 
-        public NavigateCommand(NavigationService navigationService)
+        public NavigateCommand(NavigationService<TViewModel> navigationService)
         {
             _navigationService = navigationService;
         }
