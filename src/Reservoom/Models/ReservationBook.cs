@@ -36,9 +36,15 @@ namespace Reservoom.Models
         /// Add a reservation to the reservation book.
         /// </summary>
         /// <param name="reservation">The incoming reservation.</param>
+        /// <exception cref="InvalidReservationTimeRangeException">Thrown if reservation start time is after end time.</exception>
         /// <exception cref="ReservationConflictException">Thrown if incoming reservation conflicts with existing reservation.</exception>
         public async Task AddReservation(Reservation reservation)
         {
+            if(reservation.StartTime > reservation.EndTime)
+            {
+                throw new InvalidReservationTimeRangeException(reservation);
+            }
+
             Reservation conflictingReservation = await _reservationConflictValidator.GetConflictingReservation(reservation);
 
             if(conflictingReservation != null)

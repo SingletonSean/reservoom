@@ -5,6 +5,7 @@ using Reservoom.Stores;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace Reservoom.ViewModels
         private readonly ObservableCollection<ReservationViewModel> _reservations;
 
         public IEnumerable<ReservationViewModel> Reservations => _reservations;
+
+        public bool HasReservations => _reservations.Any();
 
         private string _errorMessage;
         public string ErrorMessage
@@ -64,6 +67,7 @@ namespace Reservoom.ViewModels
             MakeReservationCommand = new NavigateCommand<MakeReservationViewModel>(makeReservationNavigationService);
 
             _hotelStore.ReservationMade += OnReservationMode;
+            _reservations.CollectionChanged += OnReservationsChanged;
         }
 
         public override void Dispose()
@@ -96,6 +100,11 @@ namespace Reservoom.ViewModels
                 ReservationViewModel reservationViewModel = new ReservationViewModel(reservation);
                 _reservations.Add(reservationViewModel);
             }
+        }
+
+        private void OnReservationsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(HasReservations));
         }
     }
 }

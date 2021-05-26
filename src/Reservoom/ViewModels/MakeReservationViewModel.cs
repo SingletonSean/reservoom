@@ -26,10 +26,19 @@ namespace Reservoom.ViewModels
             {
                 _username = value;
                 OnPropertyChanged(nameof(Username));
+
+                ClearErrors(nameof(Username));
+
+                if(!HasUsername)
+                {
+                    AddError("Username cannot be empty.", nameof(Username));
+                }
+
+                OnPropertyChanged(nameof(CanCreateReservation));
             }
         }
 
-        private int _floorNumber;
+        private int _floorNumber = 1;
         public int FloorNumber
         {
             get
@@ -40,6 +49,15 @@ namespace Reservoom.ViewModels
             {
                 _floorNumber = value;
                 OnPropertyChanged(nameof(FloorNumber));
+
+                ClearErrors(nameof(FloorNumber));
+
+                if (!HasFloorNumberGreaterThanZero)
+                {
+                    AddError("Floor number must be greater than zero.", nameof(FloorNumber));
+                }
+
+                OnPropertyChanged(nameof(CanCreateReservation));
             }
         }
 
@@ -72,10 +90,12 @@ namespace Reservoom.ViewModels
                 ClearErrors(nameof(StartDate));
                 ClearErrors(nameof(EndDate));
 
-                if (EndDate < StartDate)
+                if (!HasStartDateBeforeEndDate)
                 {
                     AddError("The start date cannot be after the end date.", nameof(StartDate));
                 }
+                
+                OnPropertyChanged(nameof(CanCreateReservation));
             }
         }
 
@@ -94,23 +114,55 @@ namespace Reservoom.ViewModels
                 ClearErrors(nameof(StartDate));
                 ClearErrors(nameof(EndDate));
 
-                if (EndDate < StartDate)
+                if (!HasStartDateBeforeEndDate)
                 {
                     AddError("The end date cannot be before the start date.", nameof(EndDate));
                 }
+
+                OnPropertyChanged(nameof(CanCreateReservation));
             }
         }
 
-        private void AddError(string errorMessage, string propertyName)
+        public bool CanCreateReservation =>
+            HasUsername &&
+            HasFloorNumberGreaterThanZero &&
+            HasStartDateBeforeEndDate &&
+            !HasErrors;
+
+        private bool HasUsername => !string.IsNullOrEmpty(Username);
+        private bool HasFloorNumberGreaterThanZero => FloorNumber > 0;
+        private bool HasStartDateBeforeEndDate => StartDate < EndDate;
+
+        private string _submitErrorMessage;
+        public string SubmitErrorMessage
         {
-            if(!_propertyNameToErrorsDictionary.ContainsKey(propertyName))
+            get
             {
-                _propertyNameToErrorsDictionary.Add(propertyName, new List<string>());
+                return _submitErrorMessage;
             }
+            set
+            {
+                _submitErrorMessage = value;
+                OnPropertyChanged(nameof(SubmitErrorMessage));
 
-            _propertyNameToErrorsDictionary[propertyName].Add(errorMessage);
+                OnPropertyChanged(nameof(HasSubmitErrorMessage));
+            }
+        }
 
-            OnErrorsChanged(propertyName);
+        public bool HasSubmitErrorMessage => !string.IsNullOrEmpty(SubmitErrorMessage);
+
+        private bool _isSubmitting;
+        public bool IsSubmitting
+        {
+            get
+            {
+                return _isSubmitting;
+            }
+            set
+            {
+                _isSubmitting = value;
+                OnPropertyChanged(nameof(IsSubmitting));
+            }
         }
 
         public ICommand SubmitCommand { get; }
@@ -133,6 +185,18 @@ namespace Reservoom.ViewModels
         public IEnumerable GetErrors(string propertyName)
         {
             return _propertyNameToErrorsDictionary.GetValueOrDefault(propertyName, new List<string>());
+        }
+
+        private void AddError(string errorMessage, string propertyName)
+        {
+            if (!_propertyNameToErrorsDictionary.ContainsKey(propertyName))
+            {
+                _propertyNameToErrorsDictionary.Add(propertyName, new List<string>());
+            }
+
+            _propertyNameToErrorsDictionary[propertyName].Add(errorMessage);
+
+            OnErrorsChanged(propertyName);
         }
 
         private void ClearErrors(string propertyName)

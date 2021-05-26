@@ -32,6 +32,7 @@ namespace Reservoom.Models
         /// Make a reservation.
         /// </summary>
         /// <param name="reservation">The incoming reservation.</param>
+        /// <exception cref="InvalidReservationTimeRangeException">Thrown if reservation start time is after end time.</exception>
         /// <exception cref="ReservationConflictException">Thrown if incoming reservation conflicts with existing reservation.</exception>
         public async Task MakeReservation(Reservation reservation)
         {
