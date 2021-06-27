@@ -23,8 +23,6 @@ namespace Reservoom.Services.ReservationProviders
         {
             using (ReservoomDbContext context = _dbContextFactory.CreateDbContext())
             {
-                await Task.Delay(3000);
-
                 IEnumerable<ReservationDTO> reservationDTOs = await context.Reservations.ToListAsync();
 
                 return reservationDTOs.Select(r => ToReservation(r));

@@ -22,8 +22,6 @@ namespace Reservoom.Services.ReservationCreators
         {
             using (ReservoomDbContext context = _dbContextFactory.CreateDbContext())
             {
-                await Task.Delay(3000);
-
                 ReservationDTO reservationDTO = ToReservationDTO(reservation);
 
                 context.Reservations.Add(reservationDTO);
