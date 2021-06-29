@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Reservoom.DbConnections;
 using Reservoom.DbContexts;
+using Reservoom.DbInitializers;
 using Reservoom.Exceptions;
 using Reservoom.HostBuilders;
 using Reservoom.Models;
@@ -37,10 +39,12 @@ namespace Reservoom
                 {
                     string connectionString = hostContext.Configuration.GetConnectionString("Default");
 
-                    services.AddSingleton(new ReservoomDbContextFactory(connectionString));
-                    services.AddSingleton<IReservationProvider, DatabaseReservationProvider>();
-                    services.AddSingleton<IReservationCreator, DatabaseReservationCreator>();
-                    services.AddSingleton<IReservationConflictValidator, DatabaseReservationConflictValidator>();
+                    services.AddSingleton(new SqliteDbConnectionFactory(connectionString));
+                    services.AddSingleton<SqliteDbInitializer>();
+
+                    services.AddSingleton<IReservationProvider, DapperReservationProvider>();
+                    services.AddSingleton<IReservationCreator, DapperReservationCreator>();
+                    services.AddSingleton<IReservationConflictValidator, DapperReservationConflictValidator>();
 
                     services.AddTransient<ReservationBook>();
 
@@ -62,11 +66,8 @@ namespace Reservoom
         {
             _host.Start();
 
-            ReservoomDbContextFactory reservoomDbContextFactory = _host.Services.GetRequiredService<ReservoomDbContextFactory>();
-            using (ReservoomDbContext dbContext = reservoomDbContextFactory.CreateDbContext())
-            {
-                dbContext.Database.Migrate();
-            }
+            SqliteDbInitializer dbInitializer = _host.Services.GetRequiredService<SqliteDbInitializer>();
+            dbInitializer.Initialize();
 
             NavigationService<ReservationListingViewModel> navigationService = _host.Services.GetRequiredService<NavigationService<ReservationListingViewModel>>();
             navigationService.Navigate();
