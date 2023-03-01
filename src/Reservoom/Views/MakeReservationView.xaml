@@ -27,7 +27,7 @@
             Style="{StaticResource Header}"
             Text="Make Reservation" />
 
-        <Grid Grid.Row="1" Margin="0 25 0 0">
+        <Grid Grid.Row="1" Margin="0,25,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
@@ -36,11 +36,12 @@
             <TextBlock Grid.Row="0" Text="Username" />
             <TextBox
                 Grid.Row="1"
-                Margin="0 5 0 0"
+                Margin="0,5,0,0"
+                AutomationProperties.AutomationId="ReservationUsernameTextBox"
                 Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
 
-        <Grid Grid.Row="2" Margin="0 10 0 0">
+        <Grid Grid.Row="2" Margin="0,10,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
@@ -57,22 +58,24 @@
             <TextBox
                 Grid.Row="1"
                 Grid.Column="0"
-                Margin="0 5 0 0"
+                Margin="0,5,0,0"
+                AutomationProperties.AutomationId="ReservationFloorNumberTextBox"
                 Text="{Binding FloorNumber, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="10 0 0 0"
+                Margin="10,0,0,0"
                 Text="Room No." />
             <TextBox
                 Grid.Row="1"
                 Grid.Column="1"
-                Margin="10 5 0 0"
+                Margin="10,5,0,0"
+                AutomationProperties.AutomationId="ReservationRoomNumberTextBox"
                 Text="{Binding RoomNumber, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
 
-        <Grid Grid.Row="3" Margin="0 10 0 0">
+        <Grid Grid.Row="3" Margin="0,10,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
@@ -89,28 +92,33 @@
             <DatePicker
                 Grid.Row="1"
                 Grid.Column="0"
-                Margin="0 5 0 0"
+                Margin="0,5,0,0"
+                AutomationProperties.AutomationId="ReservationStartDateTextBox"
                 SelectedDate="{Binding StartDate, UpdateSourceTrigger=PropertyChanged}" />
 
             <TextBlock
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="10 0 0 0"
+                Margin="10,0,0,0"
                 Text="End Date" />
             <DatePicker
                 Grid.Row="1"
                 Grid.Column="1"
-                Margin="10 5 0 0"
+                Margin="10,5,0,0"
+                AutomationProperties.AutomationId="ReservationEndDateTextBox"
                 SelectedDate="{Binding EndDate, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}" />
         </Grid>
 
         <StackPanel
             Grid.Row="4"
-            Margin="0 25 0 0"
+            Margin="0,25,0,0"
             Orientation="Horizontal">
-            <Button Command="{Binding SubmitCommand}" Content="Submit" />
             <Button
-                Margin="10 0 0 0"
+                AutomationProperties.AutomationId="ReservationSubmitButton"
+                Command="{Binding SubmitCommand}"
+                Content="Submit" />
+            <Button
+                Margin="10,0,0,0"
                 Command="{Binding CancelCommand}"
                 Content="Cancel">
                 <Button.Style>
@@ -124,7 +132,7 @@
                 </Button.Style>
             </Button>
             <custom:LoadingSpinner
-                Margin="10 0 0 0"
+                Margin="10,0,0,0"
                 VerticalAlignment="Center"
                 Diameter="25"
                 IsLoading="{Binding IsSubmitting}"
@@ -134,7 +142,7 @@
 
         <TextBlock
             Grid.Row="5"
-            Margin="0 20 0 0"
+            Margin="0,20,0,0"
             Foreground="Red"
             Text="{Binding SubmitErrorMessage}"
             Visibility="{Binding HasSubmitErrorMessage, Converter={StaticResource BooleanToVisibilityConverter}}" />
