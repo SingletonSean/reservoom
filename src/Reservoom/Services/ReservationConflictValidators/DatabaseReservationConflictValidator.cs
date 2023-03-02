@@ -12,9 +12,9 @@ namespace Reservoom.Services.ReservationConflictValidators
 {
     public class DatabaseReservationConflictValidator : IReservationConflictValidator
     {
-        private readonly ReservoomDbContextFactory _dbContextFactory;
+        private readonly IReservoomDbContextFactory _dbContextFactory;
 
-        public DatabaseReservationConflictValidator(ReservoomDbContextFactory dbContextFactory)
+        public DatabaseReservationConflictValidator(IReservoomDbContextFactory dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }

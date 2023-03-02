@@ -35,9 +35,18 @@ namespace Reservoom
                 .AddViewModels()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    string connectionString = hostContext.Configuration.GetConnectionString("Default");
+                    bool isEndToEndTest = Environment.GetCommandLineArgs().Any(a => a == "E2E");
 
-                    services.AddSingleton(new ReservoomDbContextFactory(connectionString));
+                    if (!isEndToEndTest)
+                    {
+                        string connectionString = hostContext.Configuration.GetConnectionString("Default");
+                        services.AddSingleton<IReservoomDbContextFactory>(new ReservoomDbContextFactory(connectionString));
+                    } 
+                    else
+                    {
+                        services.AddSingleton<IReservoomDbContextFactory>(new InMemoryReservoomDbContextFactory());
+                    }
+
                     services.AddSingleton<IReservationProvider, DatabaseReservationProvider>();
                     services.AddSingleton<IReservationCreator, DatabaseReservationCreator>();
                     services.AddSingleton<IReservationConflictValidator, DatabaseReservationConflictValidator>();
@@ -62,7 +71,7 @@ namespace Reservoom
         {
             _host.Start();
 
-            ReservoomDbContextFactory reservoomDbContextFactory = _host.Services.GetRequiredService<ReservoomDbContextFactory>();
+            IReservoomDbContextFactory reservoomDbContextFactory = _host.Services.GetRequiredService<IReservoomDbContextFactory>();
             using (ReservoomDbContext dbContext = reservoomDbContextFactory.CreateDbContext())
             {
                 dbContext.Database.Migrate();
