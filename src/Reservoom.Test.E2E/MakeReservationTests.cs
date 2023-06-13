@@ -4,7 +4,7 @@ using OpenQA.Selenium.Appium.Windows;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 
-namespace Reservoom.Test.E2E
+namespace Reservoom.E2E
 {
     public class MakeReservationTests
     {
@@ -28,7 +28,7 @@ namespace Reservoom.Test.E2E
                     Actions actions = new Actions(driver);
                     actions.SendKeys(Keys.Escape).Perform();
 
-                    return driver.FindElementByAccessibilityId("210_ReservationListingItem");
+                    return driver.FindElementByAccessibilityId("2_10_ReservationListingItem");
                 });
 
                 Assert.That(reservationListingItem, Is.Not.Null);
@@ -59,7 +59,7 @@ namespace Reservoom.Test.E2E
                     Actions actions = new Actions(driver);
                     actions.SendKeys(Keys.Escape).Perform();
 
-                    return driver.FindElementByAccessibilityId("210_ReservationListingItem");
+                    return driver.FindElementByAccessibilityId("2_10_ReservationListingItem");
                 });
 
                 driver.FindElementByAccessibilityId("MakeReservationButton").Click();

@@ -40,14 +40,14 @@ namespace Reservoom.Models
         /// <exception cref="ReservationConflictException">Thrown if incoming reservation conflicts with existing reservation.</exception>
         public async Task AddReservation(Reservation reservation)
         {
-            if(reservation.StartTime > reservation.EndTime)
+            if (reservation.StartTime > reservation.EndTime)
             {
                 throw new InvalidReservationTimeRangeException(reservation);
             }
 
             Reservation conflictingReservation = await _reservationConflictValidator.GetConflictingReservation(reservation);
 
-            if(conflictingReservation != null)
+            if (conflictingReservation != null)
             {
                 throw new ReservationConflictException(conflictingReservation, reservation);
             }
