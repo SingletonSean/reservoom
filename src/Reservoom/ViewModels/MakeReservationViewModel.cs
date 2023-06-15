@@ -165,7 +165,7 @@ namespace Reservoom.ViewModels
             }
         }
 
-        public ICommand SubmitCommand { get; }
+        public AsyncCommandBase SubmitCommand { get; }
         public ICommand CancelCommand { get; }
 
         private readonly Dictionary<string, List<string>> _propertyNameToErrorsDictionary;

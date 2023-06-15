@@ -49,9 +49,10 @@ namespace Reservoom.Commands
             try
             {
                 await _hotelStore.MakeReservation(reservation);
-
-                MessageBox.Show("Successfully reserved room.", "Success",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                // TODO: Abstract this for testing! 
+                //MessageBox.Show("Successfully reserved room.", "Success",
+                //    MessageBoxButton.OK, MessageBoxImage.Information);
 
                 _reservationViewNavigationService.Navigate();
             }

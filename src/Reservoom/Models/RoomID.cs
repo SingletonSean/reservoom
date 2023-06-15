@@ -19,7 +19,7 @@ namespace Reservoom.Models
 
         public override string ToString()
         {
-            return $"{FloorNumber}{RoomNumber}";
+            return $"{FloorNumber}_{RoomNumber}";
         }
 
         public override bool Equals(object obj)
