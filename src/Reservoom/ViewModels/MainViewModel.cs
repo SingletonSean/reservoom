@@ -1,4 +1,5 @@
-﻿using Reservoom.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Reservoom.Models;
 using Reservoom.Stores;
 using System;
 using System.Collections.Generic;
@@ -8,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Reservoom.ViewModels
 {
-    public class MainViewModel : ViewModelBase 
+    public class MainViewModel : ObservableObject 
     {
         private readonly NavigationStore _navigationStore;
 
-        public ViewModelBase CurrentViewModel => _navigationStore.CurrentViewModel;
+        public IPageViewModel CurrentViewModel => _navigationStore.CurrentViewModel;
 
         public MainViewModel(NavigationStore navigationStore)
         {

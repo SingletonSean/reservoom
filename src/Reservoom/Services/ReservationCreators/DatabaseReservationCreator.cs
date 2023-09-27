@@ -33,8 +33,8 @@ namespace Reservoom.Services.ReservationCreators
         {
             return new ReservationDTO()
             {
-                FloorNumber = reservation.RoomID?.FloorNumber ?? 0,
-                RoomNumber = reservation.RoomID?.RoomNumber ?? 0,
+                FloorNumber = reservation.RoomID.FloorNumber,
+                RoomNumber = reservation.RoomID.RoomNumber,
                 Username = reservation.Username,
                 StartTime = reservation.StartTime,
                 EndTime = reservation.EndTime,

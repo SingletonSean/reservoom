@@ -1,4 +1,5 @@
-﻿using Reservoom.ViewModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Reservoom.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,24 @@ namespace Reservoom.Stores
 {
     public class NavigationStore
     {
-        private ViewModelBase _currentViewModel;
-        public ViewModelBase CurrentViewModel
+        private IPageViewModel _currentViewModel;
+        public IPageViewModel CurrentViewModel
         {
             get => _currentViewModel;
             set
             {
-                _currentViewModel?.Dispose();
+                if (_currentViewModel != null)
+                {
+                    _currentViewModel.IsActive = false;
+                }
+
                 _currentViewModel = value;
+
+                if (_currentViewModel != null)
+                {
+                    _currentViewModel.IsActive = true;
+                }
+
                 OnCurrentViewModelChanged();
             }
         }

@@ -1,4 +1,5 @@
-﻿using Reservoom.Models;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Reservoom.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,6 @@ namespace Reservoom.Stores
         private Lazy<Task> _initializeLazy;
 
         public IEnumerable<Reservation> Reservations => _reservations;
-
-        public event Action<Reservation> ReservationMade;
 
         public HotelStore(Hotel hotel)
         {
@@ -49,7 +48,7 @@ namespace Reservoom.Stores
 
         private void OnReservationMade(Reservation reservation)
         {
-            ReservationMade?.Invoke(reservation);
+            StrongReferenceMessenger.Default.Send(new ReservationMadeMessage(reservation));
         }
 
         private async Task Initialize()

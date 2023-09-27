@@ -1,4 +1,6 @@
-﻿using Reservoom.Commands;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Reservoom.Models;
 using Reservoom.Services;
 using Reservoom.Stores;
@@ -13,72 +15,77 @@ using System.Windows.Input;
 
 namespace Reservoom.ViewModels
 {
-    public class ReservationListingViewModel : ViewModelBase
+    public partial class ReservationListingViewModel : ObservableRecipient, IRecipient<ReservationMadeMessage>, IPageViewModel
     {
         private readonly HotelStore _hotelStore;
-
+        private readonly NavigationService<MakeReservationViewModel> _makeReservationNavigationService;
         private readonly ObservableCollection<ReservationViewModel> _reservations;
 
         public IEnumerable<ReservationViewModel> Reservations => _reservations;
 
         public bool HasReservations => _reservations.Any();
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasErrorMessage))]
         private string _errorMessage;
-        public string ErrorMessage
-        {
-            get
-            {
-                return _errorMessage;
-            }
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged(nameof(ErrorMessage));
-
-                OnPropertyChanged(nameof(HasErrorMessage));
-            }
-        }
 
         public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
+        [ObservableProperty]
         private bool _isLoading;
-        public bool IsLoading
+
+        [RelayCommand]
+        private void MakeReservation()
         {
-            get
-            {
-                return _isLoading;
-            }
-            set
-            {
-                _isLoading = value;
-                OnPropertyChanged(nameof(IsLoading));
-            }
+            _makeReservationNavigationService.Navigate();
         }
 
-        public ICommand LoadReservationsCommand { get; }
-        public ICommand MakeReservationCommand { get; }
+        [RelayCommand]
+        private async Task LoadReservations()
+        {
+            ErrorMessage = string.Empty;
+            IsLoading = true;
+
+            try
+            {
+                await _hotelStore.Load();
+
+                UpdateReservations(_hotelStore.Reservations);
+            }
+            catch (Exception)
+            {
+                ErrorMessage = "Failed to load reservations.";
+            }
+
+            IsLoading = false;
+        }
 
         public ReservationListingViewModel(HotelStore hotelStore, NavigationService<MakeReservationViewModel> makeReservationNavigationService)
         {
             _hotelStore = hotelStore;
+            _makeReservationNavigationService = makeReservationNavigationService;
             _reservations = new ObservableCollection<ReservationViewModel>();
 
-            LoadReservationsCommand = new LoadReservationsCommand(this, hotelStore);
-            MakeReservationCommand = new NavigateCommand<MakeReservationViewModel>(makeReservationNavigationService);
-
-            _hotelStore.ReservationMade += OnReservationMode;
             _reservations.CollectionChanged += OnReservationsChanged;
         }
 
-        public override void Dispose()
+        protected override void OnActivated()
         {
-            _hotelStore.ReservationMade -= OnReservationMode;
-            base.Dispose();
+            StrongReferenceMessenger.Default.RegisterAll(this);
+
+            base.OnActivated();
         }
 
-        private void OnReservationMode(Reservation reservation)
+        protected override void OnDeactivated()
         {
-            ReservationViewModel reservationViewModel = new ReservationViewModel(reservation);
+            StrongReferenceMessenger.Default.UnregisterAll(this);
+
+            base.OnDeactivated();
+        }
+
+        public void Receive(ReservationMadeMessage message)
+        {
+            ReservationViewModel reservationViewModel = new ReservationViewModel(message.Value);
             _reservations.Add(reservationViewModel);
         }
 

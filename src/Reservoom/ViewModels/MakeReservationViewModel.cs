@@ -1,4 +1,7 @@
-﻿using Reservoom.Commands;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Reservoom.Exceptions;
 using Reservoom.Models;
 using Reservoom.Services;
 using Reservoom.Stores;
@@ -6,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,114 +17,61 @@ using System.Windows.Input;
 
 namespace Reservoom.ViewModels
 {
-    public class MakeReservationViewModel : ViewModelBase, INotifyDataErrorInfo
+    [ObservableRecipient]
+    public partial class MakeReservationViewModel : ObservableValidator, IPageViewModel
     {
+        private readonly HotelStore _hotelStore;
+        private readonly NavigationService<ReservationListingViewModel> _reservationViewNavigationService;
+
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        [Required(ErrorMessage = "Username cannot be empty.")]
+        [NotifyPropertyChangedFor(nameof(CanCreateReservation))]
+        [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
         private string _username;
-        public string Username
-        {
-            get
-            {
-                return _username;
-            }
-            set
-            {
-                _username = value;
-                OnPropertyChanged(nameof(Username));
 
-                ClearErrors(nameof(Username));
-
-                if(!HasUsername)
-                {
-                    AddError("Username cannot be empty.", nameof(Username));
-                }
-
-                OnPropertyChanged(nameof(CanCreateReservation));
-            }
-        }
-
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        [Range(1, double.MaxValue, ErrorMessage = "Floor number must be greater than zero.")]
+        [NotifyPropertyChangedFor(nameof(CanCreateReservation))]
+        [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
         private int _floorNumber = 1;
-        public int FloorNumber
-        {
-            get
-            {
-                return _floorNumber;
-            }
-            set
-            {
-                _floorNumber = value;
-                OnPropertyChanged(nameof(FloorNumber));
-
-                ClearErrors(nameof(FloorNumber));
-
-                if (!HasFloorNumberGreaterThanZero)
-                {
-                    AddError("Floor number must be greater than zero.", nameof(FloorNumber));
-                }
-
-                OnPropertyChanged(nameof(CanCreateReservation));
-            }
-        }
-
+        
+        [ObservableProperty]
         private int _roomNumber;
-        public int RoomNumber
+
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        [CustomValidation(typeof(MakeReservationViewModel), nameof(ValidateStartDateBeforeEndDate), ErrorMessage = "The start date cannot be after the end date.")]
+        [NotifyPropertyChangedFor(nameof(CanCreateReservation))]
+        [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+        private DateTime _startDate = new DateTime(2023, 9, 1);
+        partial void OnStartDateChanged(DateTime value)
         {
-            get
-            {
-                return _roomNumber;
-            }
-            set
-            {
-                _roomNumber = value;
-                OnPropertyChanged(nameof(RoomNumber));
-            }
+            ValidateProperty(EndDate, nameof(EndDate));
         }
 
-        private DateTime _startDate = new DateTime(2021, 1, 1);
-        public DateTime StartDate
+        [ObservableProperty]
+        [NotifyDataErrorInfo]
+        [CustomValidation(typeof(MakeReservationViewModel), nameof(ValidateStartDateBeforeEndDate), ErrorMessage = "The end date cannot be before the start date.")]
+        [NotifyPropertyChangedFor(nameof(CanCreateReservation))]
+        [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+        private DateTime _endDate = new DateTime(2023, 9, 3);
+        partial void OnEndDateChanged(DateTime value)
         {
-            get
-            {
-                return _startDate;
-            }
-            set
-            {
-                _startDate = value;
-                OnPropertyChanged(nameof(StartDate));
-
-                ClearErrors(nameof(StartDate));
-                ClearErrors(nameof(EndDate));
-
-                if (!HasStartDateBeforeEndDate)
-                {
-                    AddError("The start date cannot be after the end date.", nameof(StartDate));
-                }
-                
-                OnPropertyChanged(nameof(CanCreateReservation));
-            }
+            ValidateProperty(StartDate, nameof(StartDate));
         }
 
-        private DateTime _endDate = new DateTime(2021, 1, 8);
-        public DateTime EndDate
+        public static ValidationResult ValidateStartDateBeforeEndDate(string name, ValidationContext context)
         {
-            get
+            MakeReservationViewModel viewModel = (MakeReservationViewModel)context.ObjectInstance;
+
+            if (viewModel.StartDate < viewModel.EndDate)
             {
-                return _endDate;
+                return ValidationResult.Success;
             }
-            set
-            {
-                _endDate = value;
-                OnPropertyChanged(nameof(EndDate));
 
-                ClearErrors(nameof(StartDate));
-                ClearErrors(nameof(EndDate));
-
-                if (!HasStartDateBeforeEndDate)
-                {
-                    AddError("The end date cannot be before the start date.", nameof(EndDate));
-                }
-
-                OnPropertyChanged(nameof(CanCreateReservation));
-            }
+            return new("Start date is not before end date.");
         }
 
         public bool CanCreateReservation =>
@@ -133,82 +84,61 @@ namespace Reservoom.ViewModels
         private bool HasFloorNumberGreaterThanZero => FloorNumber > 0;
         private bool HasStartDateBeforeEndDate => StartDate < EndDate;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasSubmitErrorMessage))]
         private string _submitErrorMessage;
-        public string SubmitErrorMessage
-        {
-            get
-            {
-                return _submitErrorMessage;
-            }
-            set
-            {
-                _submitErrorMessage = value;
-                OnPropertyChanged(nameof(SubmitErrorMessage));
-
-                OnPropertyChanged(nameof(HasSubmitErrorMessage));
-            }
-        }
 
         public bool HasSubmitErrorMessage => !string.IsNullOrEmpty(SubmitErrorMessage);
 
+        [ObservableProperty]
         private bool _isSubmitting;
-        public bool IsSubmitting
-        {
-            get
-            {
-                return _isSubmitting;
-            }
-            set
-            {
-                _isSubmitting = value;
-                OnPropertyChanged(nameof(IsSubmitting));
-            }
-        }
-
-        public AsyncCommandBase SubmitCommand { get; }
-        public ICommand CancelCommand { get; }
-
-        private readonly Dictionary<string, List<string>> _propertyNameToErrorsDictionary;
-
-        public bool HasErrors => _propertyNameToErrorsDictionary.Any();
-
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
         public MakeReservationViewModel(HotelStore hotelStore, NavigationService<ReservationListingViewModel> reservationViewNavigationService)
         {
-            SubmitCommand = new MakeReservationCommand(this, hotelStore, reservationViewNavigationService);
-            CancelCommand = new NavigateCommand<ReservationListingViewModel>(reservationViewNavigationService);
+            _hotelStore = hotelStore;
+            _reservationViewNavigationService = reservationViewNavigationService;
 
-            _propertyNameToErrorsDictionary = new Dictionary<string, List<string>>();
+            Messenger = StrongReferenceMessenger.Default;
         }
 
-        public IEnumerable GetErrors(string propertyName)
+        [RelayCommand(CanExecute = nameof(CanCreateReservation))]
+        private async Task Submit()
         {
-            return _propertyNameToErrorsDictionary.GetValueOrDefault(propertyName, new List<string>());
-        }
+            SubmitErrorMessage = string.Empty;
+            IsSubmitting = true;
 
-        private void AddError(string errorMessage, string propertyName)
-        {
-            if (!_propertyNameToErrorsDictionary.ContainsKey(propertyName))
+            Reservation reservation = new Reservation(
+                new RoomID(FloorNumber, RoomNumber),
+                Username,
+                StartDate,
+                EndDate);
+
+            try
             {
-                _propertyNameToErrorsDictionary.Add(propertyName, new List<string>());
+                await _hotelStore.MakeReservation(reservation);
+
+                _reservationViewNavigationService.Navigate();
+            }
+            catch (ReservationConflictException)
+            {
+                SubmitErrorMessage = "This room is already taken on those dates.";
+            }
+            catch (InvalidReservationTimeRangeException)
+            {
+                SubmitErrorMessage = "Start date must be before end date.";
+            }
+            catch (Exception)
+            {
+                SubmitErrorMessage = "Failed to make reservation.";
             }
 
-            _propertyNameToErrorsDictionary[propertyName].Add(errorMessage);
-
-            OnErrorsChanged(propertyName);
+            IsSubmitting = false;
         }
 
-        private void ClearErrors(string propertyName)
+        [RelayCommand]
+        private void Cancel()
         {
-            _propertyNameToErrorsDictionary.Remove(propertyName);
-
-            OnErrorsChanged(propertyName);
-        }
-
-        private void OnErrorsChanged(string propertyName)
-        {
-            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+            _reservationViewNavigationService.Navigate();
         }
     }
 }

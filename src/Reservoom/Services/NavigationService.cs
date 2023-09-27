@@ -1,4 +1,5 @@
-﻿using Reservoom.Stores;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Reservoom.Stores;
 using Reservoom.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Reservoom.Services
 {
-    public class NavigationService<TViewModel> where TViewModel : ViewModelBase
+    public class NavigationService<TViewModel> where TViewModel : IPageViewModel
     {
         private readonly NavigationStore _navigationStore;
         private readonly Func<TViewModel> _createViewModel;

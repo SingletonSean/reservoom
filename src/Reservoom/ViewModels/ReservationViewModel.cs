@@ -1,4 +1,5 @@
-﻿using Reservoom.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Reservoom.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Reservoom.ViewModels
 {
-    public class ReservationViewModel : ViewModelBase
+    public class ReservationViewModel : ObservableObject
     {
         private readonly Reservation _reservation;
 
